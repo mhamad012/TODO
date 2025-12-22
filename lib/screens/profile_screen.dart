@@ -3,99 +3,182 @@ import 'package:get/get.dart';
 import 'package:taskflow/controllers/profile_controller.dart';
 import 'package:taskflow/controllers/theme_controller.dart';
 import 'package:taskflow/screens/login_screen.dart';
+import 'package:taskflow/controllers/task_controller.dart';
 
 class ProfileScreen extends StatelessWidget {
   final ProfileController profileController = Get.find();
   final ThemeController themeController = Get.find();
+  final TaskController taskController = Get.find();
 
   ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile'),
-      ),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-            // Profile Picture
-            CircleAvatar(
-              radius: 50,
-              child: Icon(
-                Icons.person,
-                size: 50,
-                color: Theme.of(context).colorScheme.onPrimary,
-              ),
-              backgroundColor: Theme.of(context).primaryColor,
-            ),
-            const SizedBox(height: 16),
-            
-            // User Info Form
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Form(
-                  child: Column(
-                    children: [
-                      TextFormField(
-                        controller: profileController.nameController,
-                        decoration: const InputDecoration(
-                          labelText: 'Name',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.person),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      
-                      TextFormField(
-                        controller: profileController.emailController,
-                        decoration: const InputDecoration(
-                          labelText: 'Email',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.email),
-                        ),
-                        keyboardType: TextInputType.emailAddress,
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-                  ),
+        child: Column(
+          children: [
+            // Header with Profile Info
+            Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0xFF4A5FD9), Color(0xFF8B7FDB)],
                 ),
               ),
-            ),
-            
-            const SizedBox(height: 16),
-            
-            // Settings
-            Card(
+              padding: const EdgeInsets.fromLTRB(20, 50, 20, 30),
               child: Column(
                 children: [
-                  Obx(() {
-                    return SwitchListTile(
-                      title: const Text('Enable Notifications'),
-                      subtitle: const Text('Receive task reminders'),
-                      value: profileController.notificationEnabled.value,
-                      onChanged: (value) {
-                        profileController.toggleNotifications(value);
-                      },
-                      secondary: const Icon(Icons.notifications),
-                    );
-                  }),
-                  
-                  Obx(() {
-                    return ListTile(
-                      leading: const Icon(Icons.color_lens),
-                      title: const Text('Theme'),
-                      subtitle: Text(themeController.themeMode.value.toString().split('.').last.capitalizeFirst!),
-                      onTap: _showThemeDialog,
-                    );
-                  }),
-                  
-                  ListTile(
-                    leading: const Icon(Icons.info),
-                    title: const Text('About'),
+                  // Profile Avatar
+                  Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 4),
+                      color: Colors.white24,
+                    ),
+                    child: Center(
+                      child: Text(
+                        _getInitials(),
+                        style: const TextStyle(
+                          fontSize: 48,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Name and Email
+                  Text(
+                    profileController.nameController.text,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    profileController.emailController.text,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.white70,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            // Stats Cards
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  _buildStatCard('24', 'Total\nTasks'),
+                  const SizedBox(width: 12),
+                  _buildStatCard('18', 'Completed'),
+                  const SizedBox(width: 12),
+                  _buildStatCard('6', 'Pending'),
+                ],
+              ),
+            ),
+            const SizedBox(height: 30),
+            // Menu Items
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                children: [
+                  _buildMenuItem(
+                    icon: Icons.person,
+                    iconColor: Colors.grey,
+                    title: 'Edit Profile',
+                    onTap: () {
+                      Get.defaultDialog(
+                        title: 'Edit Profile',
+                        content: Column(
+                          children: [
+                            TextField(
+                              controller: profileController.nameController,
+                              decoration: InputDecoration(
+                                labelText: 'Name',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            TextField(
+                              controller: profileController.emailController,
+                              decoration: InputDecoration(
+                                labelText: 'Email',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              profileController.saveProfile();
+                              Get.back();
+                            },
+                            child: const Text('Save'),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                  _buildMenuItem(
+                    icon: Icons.notifications,
+                    iconColor: const Color(0xFFFFB74D),
+                    title: 'Notifications',
+                    onTap: () {
+                      Get.defaultDialog(
+                        title: 'Notifications',
+                        content: Obx(() {
+                          return SwitchListTile(
+                            title: const Text('Enable Notifications'),
+                            value: profileController.notificationEnabled.value,
+                            onChanged: (value) {
+                              profileController.toggleNotifications(value);
+                            },
+                          );
+                        }),
+                      );
+                    },
+                  ),
+                  _buildMenuItem(
+                    icon: Icons.palette,
+                    iconColor: const Color(0xFFEF9A9A),
+                    title: 'Theme & Display',
+                    onTap: _showThemeDialog,
+                  ),
+                  _buildMenuItem(
+                    icon: Icons.bar_chart,
+                    iconColor: const Color(0xFF81C784),
+                    title: 'Task Statistics',
+                    onTap: () {
+                      Get.defaultDialog(
+                        title: 'Task Statistics',
+                        content: Column(
+                          children: [
+                            _buildStatRow('Total Tasks', taskController.tasks.length.toString()),
+                            _buildStatRow('Completed', taskController.tasks.where((t) => t.isCompleted).length.toString()),
+                            _buildStatRow('Pending', taskController.tasks.where((t) => !t.isCompleted).length.toString()),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                  _buildMenuItem(
+                    icon: Icons.info,
+                    iconColor: Colors.grey,
+                    title: 'About TaskFlow',
                     onTap: () {
                       Get.defaultDialog(
                         title: 'About TaskFlow',
@@ -123,38 +206,127 @@ class ProfileScreen extends StatelessWidget {
                 ],
               ),
             ),
-            
-            const SizedBox(height: 32),
-            
-            ElevatedButton(
-              onPressed: () {
-                profileController.saveProfile();
-                Get.snackbar(
-                  'Profile Updated',
-                  'Your profile has been updated successfully',
-                  snackPosition: SnackPosition.BOTTOM,
-                  backgroundColor: Colors.green,
-                  colorText: Colors.white,
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 50),
+            const SizedBox(height: 30),
+            // Logout Button
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _logout,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    backgroundColor: Colors.white,
+                    foregroundColor: const Color(0xFF1E88E5),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      side: const BorderSide(color: Color(0xFF1E88E5), width: 1.5),
+                    ),
+                  ),
+                  child: const Text(
+                    'Logout',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
               ),
-              child: const Text('Save Profile'),
             ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _logout,
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 50),
-                backgroundColor: Colors.white,
-                foregroundColor: Colors.blue,
-              ),
-              child: const Text('Logout'),
+            const SizedBox(height: 30),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _getInitials() {
+    final name = profileController.nameController.text;
+    if (name.isEmpty) return 'AA';
+    final parts = name.split(' ');
+    return '${parts[0][0]}${parts.length > 1 ? parts[1][0] : parts[0][0]}';
+  }
+
+  Widget _buildStatCard(String value, String label) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
             ),
           ],
-          ),
         ),
+        child: Column(
+          children: [
+            Text(
+              value,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1E88E5),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMenuItem({
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        child: Row(
+          children: [
+            Icon(icon, color: iconColor, size: 24),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black87,
+                ),
+              ),
+            ),
+            Icon(Icons.chevron_right, color: Colors.grey[400], size: 24),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
+        ],
       ),
     );
   }
@@ -166,16 +338,12 @@ class ProfileScreen extends StatelessWidget {
       textConfirm: 'Logout',
       textCancel: 'Cancel',
       confirmTextColor: Colors.white,
-      buttonColor: Colors.red,
+      buttonColor: const Color(0xFFE53935),
       onConfirm: () {
         profileController.nameController.clear();
         profileController.emailController.clear();
         profileController.saveProfile();
         Get.offAll(() => const LoginScreen());
-        Get.snackbar('Logged Out', 'You have been logged out',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.blue,
-            colorText: Colors.white);
       },
     );
   }
