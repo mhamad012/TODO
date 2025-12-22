@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:taskflow/controllers/task_controller.dart';
 import 'package:taskflow/models/task_model.dart';
 import 'package:intl/intl.dart';
+import 'package:taskflow/screens/home_screen.dart';
 
 class AddTaskScreen extends StatefulWidget {
   final Task? existingTask;
@@ -423,6 +424,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       Get.snackbar('Success', 'Task created successfully');
     }
     
-    Get.back();
+    // Navigate back to home explicitly so user returns to updated list
+    Get.offAll(() => HomeScreen());
   }
 }

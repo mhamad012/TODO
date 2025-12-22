@@ -21,7 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       body: Container(
-        color: const Color(0xFFF5F5F5),
+        color: Theme.of(context).scaffoldBackgroundColor,
         child: SingleChildScrollView(
           child: Column(
             children: [
@@ -41,10 +41,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Column(
+                        Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               'My Tasks',
                               style: TextStyle(
                                 fontSize: 28,
@@ -52,10 +52,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                 color: Colors.white,
                               ),
                             ),
-                            SizedBox(height: 4),
+                            const SizedBox(height: 4),
                             Text(
-                              'Monday, December 16, 2025',
-                              style: TextStyle(
+                              DateFormat('EEEE, MMMM d, yyyy').format(DateTime.now()),
+                              style: const TextStyle(
                                 fontSize: 14,
                                 color: Colors.white70,
                               ),
@@ -92,7 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     // Search Bar
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).cardColor,
                         borderRadius: BorderRadius.circular(25),
                         boxShadow: [
                           BoxShadow(
@@ -187,7 +187,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Get.to(() => const AddTaskScreen()),
-        backgroundColor: const Color(0xFF4A5FD9),
+        backgroundColor: Theme.of(context).colorScheme.primary,
         shape: const CircleBorder(),
         child: const Icon(Icons.add, color: Colors.white, size: 28),
       ),
@@ -199,12 +199,12 @@ class _HomeScreenState extends State<HomeScreen> {
       onTap: onTap,
       child: Column(
         children: [
-          Text(
+            Text(
             label,
             style: TextStyle(
               fontSize: 16,
               fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
-              color: isActive ? const Color(0xFF4A5FD9) : Colors.grey[500],
+              color: isActive ? Theme.of(context).colorScheme.primary : Colors.grey[500],
             ),
           ),
           if (isActive)
@@ -213,7 +213,7 @@ class _HomeScreenState extends State<HomeScreen> {
               width: 35,
               margin: const EdgeInsets.only(top: 8),
               decoration: BoxDecoration(
-                color: const Color(0xFF1E88E5),
+                color: Theme.of(context).colorScheme.primary,
                 borderRadius: BorderRadius.circular(2),
               ),
             )
@@ -228,7 +228,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -245,7 +245,7 @@ class _HomeScreenState extends State<HomeScreen> {
             width: 5,
             height: 100,
             decoration: BoxDecoration(
-              color: const Color(0xFF1E88E5),
+              color: Theme.of(context).colorScheme.primary,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(12),
                 bottomLeft: Radius.circular(12),
@@ -269,12 +269,12 @@ class _HomeScreenState extends State<HomeScreen> {
                           height: 24,
                           decoration: BoxDecoration(
                             color: task.isCompleted
-                                ? const Color(0xFF4A5FD9)
-                                : Colors.white,
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context).cardColor,
                             border: Border.all(
-                              color: task.isCompleted
-                                  ? const Color(0xFF4A5FD9)
-                                  : const Color(0xFF1E88E5),
+                                color: task.isCompleted
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Theme.of(context).colorScheme.primary,
                               width: 2,
                             ),
                             borderRadius: BorderRadius.circular(6),
@@ -295,9 +295,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w600,
-                                color: task.isCompleted
-                                    ? Colors.grey[400]
-                                    : Colors.black87,
+                                    color: task.isCompleted
+                                      ? Colors.grey[400]
+                                      : Theme.of(context).textTheme.bodyLarge?.color,
                                 decoration: task.isCompleted
                                     ? TextDecoration.lineThrough
                                     : null,
@@ -307,13 +307,13 @@ class _HomeScreenState extends State<HomeScreen> {
                             Row(
                               children: [
                                 Icon(Icons.calendar_today,
-                                    size: 14, color: Colors.grey[500]),
+                                  size: 14, color: Theme.of(context).textTheme.bodySmall?.color),
                                 const SizedBox(width: 4),
                                 Text(
                                   DateFormat('MMM dd, yyyy').format(task.dueDate),
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: Colors.grey[600],
+                                    color: Theme.of(context).textTheme.bodySmall?.color,
                                   ),
                                 ),
                                 const SizedBox(width: 16),
@@ -354,7 +354,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
               ),
             ],
-            child: Icon(Icons.more_vert, color: Colors.grey[400], size: 20),
+            child: Icon(Icons.more_vert, color: Theme.of(context).iconTheme.color?.withOpacity(0.6), size: 20),
           ),
         ],
       ),

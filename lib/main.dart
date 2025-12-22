@@ -5,6 +5,8 @@ import 'package:taskflow/app/bindings/initial_bindings.dart';
 import 'package:taskflow/screens/home_screen.dart';
 import 'package:taskflow/screens/login_screen.dart';
 import 'package:taskflow/controllers/profile_controller.dart';
+import 'package:taskflow/controllers/theme_controller.dart';
+import 'package:taskflow/utils/theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,16 +25,18 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ProfileController profileController = Get.find();
-
-    return GetMaterialApp(
+    final ThemeController themeController = Get.find();
+    return Obx(() => GetMaterialApp(
       title: 'TaskFlow',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        useMaterial3: true,
-      ),
+      theme: lightTheme,
+      darkTheme: darkTheme,
+      // Treat `system` as light by default (effective mode)
+      themeMode: themeController.themeMode.value == ThemeMode.system
+          ? ThemeMode.light
+          : themeController.themeMode.value,
       // initial bindings are registered in main() above
       debugShowCheckedModeBanner: false,
       home: profileController.emailController.text.isEmpty ? const LoginScreen() : const HomeScreen(),
-    );
+    ));
   }
 }
