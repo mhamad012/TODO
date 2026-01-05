@@ -1,64 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:taskflow/controllers/profile_controller.dart';
 import 'package:taskflow/controllers/task_controller.dart';
+import 'package:taskflow/controllers/task_form_controller.dart';
 import 'package:taskflow/models/task_model.dart';
 import 'package:intl/intl.dart';
 import 'package:taskflow/screens/home_screen.dart';
 
-class AddTaskScreen extends StatefulWidget {
+class AddTaskScreen extends StatelessWidget {
   final Task? existingTask;
 
   const AddTaskScreen({super.key, this.existingTask});
 
   @override
-  State<AddTaskScreen> createState() => _AddTaskScreenState();
-}
-
-class _AddTaskScreenState extends State<AddTaskScreen> {
-  late TextEditingController titleController;
-  late TextEditingController descriptionController;
-  late TextEditingController dateTimeController;
-  String selectedPriority = 'Medium';
-  String selectedCategory = 'Work';
-  late DateTime selectedDateTime;
-
-  final List<String> priorities = ['Low', 'Medium', 'High'];
-  final List<String> categories = ['Work', 'Personal', 'Shopping', 'Health', 'Other'];
-  final TaskController taskController = Get.find();
-
-  @override
-  void initState() {
-    super.initState();
-    titleController = TextEditingController(text: widget.existingTask?.title ?? '');
-    descriptionController = TextEditingController(text: widget.existingTask?.description ?? '');
-    
-    if (widget.existingTask != null) {
-      selectedDateTime = widget.existingTask!.dueDate;
-    } else {
-      selectedDateTime = DateTime.now().add(const Duration(days: 1));
-    }
-    
-    _updateDateTimeDisplay();
-    selectedPriority = widget.existingTask?.priority ?? 'Medium';
-    selectedCategory = widget.existingTask?.category ?? 'Work';
-  }
-
-  void _updateDateTimeDisplay() {
-    dateTimeController = TextEditingController(
-      text: DateFormat('MMM dd, yyyy').format(selectedDateTime),
-    );
-  }
-
-  @override
-  void dispose() {
-    titleController.dispose();
-    descriptionController.dispose();
-    dateTimeController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    // Initialize form controller and task controller
+    final formController = Get.put(TaskFormController());
+    formController.initializeForEdit(existingTask);
+
+    final taskController = Get.find<TaskController>();
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -76,12 +37,19 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
               child: Row(
                 children: [
                   GestureDetector(
-                    onTap: () => Get.back(),
-                    child: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
+                    onTap: () {
+                      Get.delete<TaskFormController>();
+                      Get.back();
+                    },
+                    child: const Icon(
+                      Icons.arrow_back,
+                      color: Colors.white,
+                      size: 28,
+                    ),
                   ),
                   const SizedBox(width: 16),
                   Text(
-                    widget.existingTask != null ? 'Edit Task' : 'New Task',
+                    existingTask != null ? 'Edit Task' : 'New Task',
                     style: const TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
@@ -101,25 +69,10 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                   _buildSectionLabel('Task Title *'),
                   const SizedBox(height: 10),
                   TextField(
-                    controller: titleController,
-                    decoration: InputDecoration(
+                    controller: formController.titleController,
+                    decoration: _buildInputDecoration(
+                      context,
                       hintText: 'What needs to be done?',
-                      hintStyle: TextStyle(color: Colors.grey[400]),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFF1E88E5), width: 2),
-                      ),
-                      filled: true,
-                      fillColor: Colors.grey[50],
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -127,65 +80,65 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                   _buildSectionLabel('Description'),
                   const SizedBox(height: 10),
                   TextField(
-                    controller: descriptionController,
+                    controller: formController.descriptionController,
                     maxLines: 4,
-                    decoration: InputDecoration(
+                    decoration: _buildInputDecoration(
+                      context,
                       hintText: 'Add details about your task...',
-                      hintStyle: TextStyle(color: Colors.grey[400]),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFF1E88E5), width: 2),
-                      ),
-                      filled: true,
-                      fillColor: Colors.grey[50],
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                     ),
                   ),
                   const SizedBox(height: 20),
                   // Due Date & Time (Combined)
                   _buildSectionLabel('Due Date & Time'),
                   const SizedBox(height: 10),
-                  GestureDetector(
-                    onTap: () => _selectDateTime(context),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey[300]!),
-                        borderRadius: BorderRadius.circular(12),
-                        color: Colors.grey[50],
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.calendar_today, color: Colors.grey[600], size: 20),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              dateTimeController.text,
-                              style: TextStyle(
+                  Obx(
+                    () => GestureDetector(
+                      onTap: () => _selectDateTime(context, formController),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey[300]!),
+                          borderRadius: BorderRadius.circular(12),
+                          color: Colors.grey[50],
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.calendar_today,
+                              color: Colors.grey[600],
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                formController.dateTimeController.text,
+                                style: const TextStyle(
+                                  color: Colors.black87,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Icon(
+                              Icons.access_time,
+                              color: Colors.grey[600],
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              DateFormat(
+                                'h:mm a',
+                              ).format(formController.selectedDateTime.value),
+                              style: const TextStyle(
                                 color: Colors.black87,
                                 fontSize: 14,
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          Icon(Icons.access_time, color: Colors.grey[600], size: 20),
-                          const SizedBox(width: 8),
-                          Text(
-                            DateFormat('h:mm a').format(selectedDateTime),
-                            style: TextStyle(
-                              color: Colors.black87,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -193,75 +146,79 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                   // Priority
                   _buildSectionLabel('Priority Level'),
                   const SizedBox(height: 10),
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey[300]!),
-                      borderRadius: BorderRadius.circular(12),
-                      color: Colors.grey[50],
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: DropdownButton<String>(
-                      value: selectedPriority,
-                      isExpanded: true,
-                      underline: const SizedBox(),
-                      items: priorities.map((priority) {
-                        return DropdownMenuItem(
-                          value: priority,
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 12,
-                                height: 12,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: _getPriorityColor(priority),
+                  Obx(
+                    () => Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey[300]!),
+                        borderRadius: BorderRadius.circular(12),
+                        color: Colors.grey[50],
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: DropdownButton<String>(
+                        value: formController.selectedPriority.value,
+                        isExpanded: true,
+                        underline: const SizedBox(),
+                        items: formController.priorities.map((priority) {
+                          return DropdownMenuItem(
+                            value: priority,
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 12,
+                                  height: 12,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: _getPriorityColor(priority),
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(width: 10),
-                              Text('$priority Priority'),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (newValue) {
-                        setState(() {
-                          selectedPriority = newValue!;
-                        });
-                      },
+                                const SizedBox(width: 10),
+                                Text('$priority Priority'),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (newValue) {
+                          formController.setPriority(newValue!);
+                        },
+                      ),
                     ),
                   ),
                   const SizedBox(height: 20),
                   // Category
                   _buildSectionLabel('Category'),
                   const SizedBox(height: 10),
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey[300]!),
-                      borderRadius: BorderRadius.circular(12),
-                      color: Colors.grey[50],
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: DropdownButton<String>(
-                      value: selectedCategory,
-                      isExpanded: true,
-                      underline: const SizedBox(),
-                      items: categories.map((category) {
-                        return DropdownMenuItem(
-                          value: category,
-                          child: Row(
-                            children: [
-                              Icon(_getCategoryIcon(category), size: 18, color: Colors.grey[600]),
-                              const SizedBox(width: 10),
-                              Text(category),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (newValue) {
-                        setState(() {
-                          selectedCategory = newValue!;
-                        });
-                      },
+                  Obx(
+                    () => Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey[300]!),
+                        borderRadius: BorderRadius.circular(12),
+                        color: Colors.grey[50],
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: DropdownButton<String>(
+                        value: formController.selectedCategory.value,
+                        isExpanded: true,
+                        underline: const SizedBox(),
+                        items: formController.categories.map((category) {
+                          return DropdownMenuItem(
+                            value: category,
+                            child: Row(
+                              children: [
+                                Icon(
+                                  _getCategoryIcon(category),
+                                  size: 18,
+                                  color: Colors.grey[600],
+                                ),
+                                const SizedBox(width: 10),
+                                Text(category),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (newValue) {
+                          formController.setCategory(newValue!);
+                        },
+                      ),
                     ),
                   ),
                   const SizedBox(height: 30),
@@ -278,14 +235,15 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: ElevatedButton(
-                        onPressed: _saveTask,
+                        onPressed: () =>
+                            _saveTask(formController, taskController),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
                           shadowColor: Colors.transparent,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
                         child: Text(
-                          widget.existingTask != null ? 'Save Changes' : 'Create Task',
+                          existingTask != null ? 'Save Changes' : 'Create Task',
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -313,6 +271,31 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
         fontWeight: FontWeight.w600,
         color: Colors.black87,
       ),
+    );
+  }
+
+  InputDecoration _buildInputDecoration(
+    BuildContext context, {
+    required String hintText,
+  }) {
+    return InputDecoration(
+      hintText: hintText,
+      hintStyle: TextStyle(color: Colors.grey[400]),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey[300]!),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey[300]!),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFF1E88E5), width: 2),
+      ),
+      filled: true,
+      fillColor: Colors.grey[50],
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     );
   }
 
@@ -344,34 +327,35 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     }
   }
 
-  Future<void> _selectDateTime(BuildContext context) async {
+  Future<void> _selectDateTime(
+    BuildContext context,
+    TaskFormController formController,
+  ) async {
     final pickedDate = await showDatePicker(
       context: context,
-      initialDate: selectedDateTime,
+      initialDate: formController.selectedDateTime.value,
       firstDate: DateTime.now(),
       lastDate: DateTime(2100),
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: Color(0xFF4A5FD9),
-            ),
+            colorScheme: const ColorScheme.light(primary: Color(0xFF4A5FD9)),
           ),
           child: child!,
         );
       },
     );
 
-    if (pickedDate != null && mounted) {
+    if (pickedDate != null) {
       final pickedTime = await showTimePicker(
         context: context,
-        initialTime: TimeOfDay.fromDateTime(selectedDateTime),
+        initialTime: TimeOfDay.fromDateTime(
+          formController.selectedDateTime.value,
+        ),
         builder: (context, child) {
           return Theme(
             data: Theme.of(context).copyWith(
-              colorScheme: const ColorScheme.light(
-                primary: Color(0xFF4A5FD9),
-              ),
+              colorScheme: const ColorScheme.light(primary: Color(0xFF4A5FD9)),
             ),
             child: child!,
           );
@@ -379,52 +363,62 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       );
 
       if (pickedTime != null) {
-        setState(() {
-          selectedDateTime = DateTime(
-            pickedDate.year,
-            pickedDate.month,
-            pickedDate.day,
-            pickedTime.hour,
-            pickedTime.minute,
-          );
-          _updateDateTimeDisplay();
-        });
+        final newDateTime = DateTime(
+          pickedDate.year,
+          pickedDate.month,
+          pickedDate.day,
+          pickedTime.hour,
+          pickedTime.minute,
+        );
+        formController.setDateTime(newDateTime);
       }
     }
   }
 
-  void _saveTask() {
-    if (titleController.text.isEmpty) {
-      Get.snackbar('Error', 'Please enter a task title');
-      return;
-    }
-
-    if (widget.existingTask != null) {
-      widget.existingTask!.title = titleController.text;
-      widget.existingTask!.description = descriptionController.text;
-      widget.existingTask!.dueDate = selectedDateTime;
-      widget.existingTask!.priority = selectedPriority;
-      widget.existingTask!.category = selectedCategory;
-      
-      taskController.updateTask(widget.existingTask!);
-      Get.snackbar('Success', 'Task updated successfully');
-    } else {
-      final newTask = Task(
-        id: DateTime.now().millisecondsSinceEpoch,
-        title: titleController.text,
-        description: descriptionController.text,
-        dueDate: selectedDateTime,
-        priority: selectedPriority,
-        category: selectedCategory,
-        isCompleted: false,
-        createdAt: DateTime.now(),
-      );
-      
-      taskController.addTask(newTask);
-      Get.snackbar('Success', 'Task created successfully');
-    }
-    
-    // Navigate back to home explicitly so user returns to updated list
-    Get.offAll(() => HomeScreen());
+  void _saveTask(
+  TaskFormController formController,
+  TaskController taskController,
+) {
+  // Validate form
+  if (!formController.validateForm()) {
+    return;
   }
+
+  final profileController = Get.find<ProfileController>();
+  final currentEmail = profileController.currentUserEmail.value;
+
+  if (existingTask != null) {
+    existingTask!.title = formController.titleController.text;
+    existingTask!.description = formController.descriptionController.text;
+    existingTask!.dueDate = formController.selectedDateTime.value;
+    existingTask!.priority = formController.selectedPriority.value;
+    existingTask!.category = formController.selectedCategory.value;
+
+    taskController.updateTask(existingTask!);
+    Get.snackbar('Success', 'Task updated successfully');
+  } else {
+    final newTask = Task(
+      id: DateTime.now().millisecondsSinceEpoch,
+      title: formController.titleController.text,
+      description: formController.descriptionController.text,
+      dueDate: formController.selectedDateTime.value,
+      priority: formController.selectedPriority.value,
+      category: formController.selectedCategory.value,
+      isCompleted: false,
+      createdAt: DateTime.now(),
+      userId: currentEmail,
+    );
+
+    taskController.addTask(newTask);
+    Get.snackbar('Success', 'Task created successfully');
+  }
+
+  // FIXED: Navigate first, then clean up
+  Get.offAll(() => const HomeScreen());
+  
+  // Clean up after navigation (with small delay)
+  Future.delayed(const Duration(milliseconds: 100), () {
+    Get.delete<TaskFormController>();
+  });
+}
 }

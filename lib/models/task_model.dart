@@ -9,6 +9,7 @@ class Task {
   String category;
   List<String> tags;
   DateTime createdAt;
+  String userId; // ADDED: to track which user owns this task
 
   Task({
     this.id,
@@ -20,6 +21,7 @@ class Task {
     this.category = 'General',
     this.tags = const [],
     required this.createdAt,
+    required this.userId, // ADDED: required field
   });
 
   Map<String, dynamic> toMap() {
@@ -33,6 +35,7 @@ class Task {
       'category': category,
       'tags': tags.join(','),
       'createdAt': createdAt.toIso8601String(),
+      'userId': userId, // ADDED
     };
   }
 
@@ -40,13 +43,16 @@ class Task {
     return Task(
       id: map['id'],
       title: map['title'],
-      description: map['description'],
+      description: map['description'] ?? '',
       dueDate: DateTime.parse(map['dueDate']),
-      priority: map['priority'],
+      priority: map['priority'] ?? 'medium',
       isCompleted: map['isCompleted'] == 1,
-      category: map['category'],
-      tags: map['tags']?.split(',') ?? [],
+      category: map['category'] ?? 'General',
+      tags: (map['tags'] != null && map['tags'].toString().isNotEmpty) 
+          ? map['tags'].split(',') 
+          : [],
       createdAt: DateTime.parse(map['createdAt']),
+      userId: map['userId'] ?? '', // ADDED with fallback
     );
   }
 }

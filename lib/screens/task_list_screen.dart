@@ -41,9 +41,7 @@ class TaskListScreen extends StatelessWidget {
             child: Obx(() {
               final tasks = taskController.filteredTasks;
               if (tasks.isEmpty) {
-                return const Center(
-                  child: Text('No tasks found'),
-                );
+                return const Center(child: Text('No tasks found'));
               }
               return ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -72,10 +70,7 @@ class TaskListScreen extends StatelessWidget {
             return DropdownButtonFormField<String>(
               value: taskController.selectedCategory.value,
               items: categories.map((category) {
-                return DropdownMenuItem(
-                  value: category,
-                  child: Text(category),
-                );
+                return DropdownMenuItem(value: category, child: Text(category));
               }).toList(),
               onChanged: (value) {
                 if (value != null) {
@@ -89,7 +84,7 @@ class TaskListScreen extends StatelessWidget {
             );
           }),
           const SizedBox(height: 16),
-          
+
           // Priority Filter
           Obx(() {
             return DropdownButtonFormField<String>(
@@ -122,10 +117,7 @@ class TaskListScreen extends StatelessWidget {
           },
           child: const Text('Reset'),
         ),
-        TextButton(
-          onPressed: Get.back,
-          child: const Text('Close'),
-        ),
+        TextButton(onPressed: Get.back, child: const Text('Close')),
       ],
     );
   }

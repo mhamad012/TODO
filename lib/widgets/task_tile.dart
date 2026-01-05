@@ -65,8 +65,8 @@ class TaskTile extends StatelessWidget {
           title: Text(
             task.title,
             style: TextStyle(
-              decoration: task.isCompleted 
-                  ? TextDecoration.lineThrough 
+              decoration: task.isCompleted
+                  ? TextDecoration.lineThrough
                   : TextDecoration.none,
             ),
           ),
@@ -81,18 +81,11 @@ class TaskTile extends StatelessWidget {
                 ),
               Row(
                 children: [
-                  Icon(
-                    Icons.calendar_today,
-                    size: 14,
-                    color: Colors.grey,
-                  ),
+                  Icon(Icons.calendar_today, size: 14, color: Colors.grey),
                   const SizedBox(width: 4),
                   Text(
                     '${task.dueDate.year}-${task.dueDate.month}-${task.dueDate.day}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
-                    ),
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                   const SizedBox(width: 16),
                   Icon(
@@ -116,10 +109,7 @@ class TaskTile extends StatelessWidget {
                   spacing: 4,
                   children: task.tags.take(3).map((tag) {
                     return Chip(
-                      label: Text(
-                        tag,
-                        style: const TextStyle(fontSize: 10),
-                      ),
+                      label: Text(tag, style: const TextStyle(fontSize: 10)),
                       padding: EdgeInsets.zero,
                       labelPadding: const EdgeInsets.symmetric(horizontal: 4),
                     );
