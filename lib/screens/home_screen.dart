@@ -2,18 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:taskflow/controllers/task_controller.dart';
+import 'package:taskflow/models/task_model.dart';
 import 'package:taskflow/screens/profile_screen.dart';
 import 'package:taskflow/screens/add_task_screen.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
-
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  String _selectedTab = 'All';
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +48,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              DateFormat('EEEE, MMMM d, yyyy').format(DateTime.now()),
+                              DateFormat(
+                                'EEEE, MMMM d, yyyy',
+                              ).format(DateTime.now()),
                               style: const TextStyle(
                                 fontSize: 14,
                                 color: Colors.white70,
@@ -117,39 +113,48 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(height: 20),
                     // Tab Navigation
-                    Row(
-                      children: [
-                        _buildTab('All', _selectedTab == 'All', () {
-                          setState(() => _selectedTab = 'All');
-                        }),
-                        const SizedBox(width: 40),
-                        _buildTab('Today', _selectedTab == 'Today', () {
-                          setState(() => _selectedTab = 'Today');
-                        }),
-                        const SizedBox(width: 40),
-                        _buildTab('Completed', _selectedTab == 'Completed', () {
-                          setState(() => _selectedTab = 'Completed');
-                        }),
-                      ],
+                    Obx(
+                      () => Row(
+                        children: [
+                          _buildTab(
+                            'All',
+                            taskController.selectedTab.value == 'All',
+                            () {
+                              taskController.setSelectedTab('All');
+                            },
+                            context,
+                          ),
+                          const SizedBox(width: 40),
+                          _buildTab(
+                            'Today',
+                            taskController.selectedTab.value == 'Today',
+                            () {
+                              taskController.setSelectedTab('Today');
+                            },
+                            context,
+                          ),
+                          const SizedBox(width: 40),
+                          _buildTab(
+                            'Completed',
+                            taskController.selectedTab.value == 'Completed',
+                            () {
+                              taskController.setSelectedTab('Completed');
+                            },
+                            context,
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 20),
                     // Task List
                     Obx(() {
-                      List<dynamic> displayedTasks = taskController.filteredTasks;
+                      List<Task> displayedTasks = taskController.filteredTasks;
 
-                      if (_selectedTab == 'Today') {
-                        displayedTasks = taskController.filteredTasks
-                            .where((task) {
-                              final today = DateTime.now();
-                              return task.dueDate.day == today.day &&
-                                  task.dueDate.month == today.month &&
-                                  task.dueDate.year == today.year;
-                            })
-                            .toList();
-                      } else if (_selectedTab == 'Completed') {
-                        displayedTasks = taskController.filteredTasks
-                            .where((task) => task.isCompleted)
-                            .toList();
+                      if (taskController.selectedTab.value == 'Today') {
+                        displayedTasks = taskController.todayTasks;
+                      } else if (taskController.selectedTab.value ==
+                          'Completed') {
+                        displayedTasks = taskController.completedTasks;
                       }
 
                       if (displayedTasks.isEmpty) {
@@ -157,7 +162,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           padding: const EdgeInsets.symmetric(vertical: 40),
                           child: Column(
                             children: [
-                              Icon(Icons.check_circle_outline, size: 64, color: Colors.grey[400]),
+                              Icon(
+                                Icons.check_circle_outline,
+                                size: 64,
+                                color: Colors.grey[400],
+                              ),
                               const SizedBox(height: 16),
                               Text(
                                 'No tasks yet',
@@ -173,7 +182,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                       return Column(
                         children: displayedTasks.map((task) {
-                          return _buildTaskCard(task, taskController);
+                          return _buildTaskCard(task, taskController, context);
                         }).toList(),
                       );
                     }),
@@ -194,17 +203,24 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildTab(String label, bool isActive, VoidCallback onTap) {
+  Widget _buildTab(
+    String label,
+    bool isActive,
+    VoidCallback onTap,
+    BuildContext context,
+  ) {
     return GestureDetector(
       onTap: onTap,
       child: Column(
         children: [
-            Text(
+          Text(
             label,
             style: TextStyle(
               fontSize: 16,
               fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
-              color: isActive ? Theme.of(context).colorScheme.primary : Colors.grey[500],
+              color: isActive
+                  ? Theme.of(context).colorScheme.primary
+                  : Colors.grey[500],
             ),
           ),
           if (isActive)
@@ -224,7 +240,11 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildTaskCard(dynamic task, TaskController controller) {
+  Widget _buildTaskCard(
+    Task task,
+    TaskController controller,
+    BuildContext context,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -262,26 +282,30 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       GestureDetector(
                         onTap: () {
-                          if (task.id != null) controller.toggleTaskCompletion(task.id!);
+                          if (task.id != null)
+                            controller.toggleTaskCompletion(task.id!);
                         },
                         child: Container(
                           width: 24,
                           height: 24,
                           decoration: BoxDecoration(
                             color: task.isCompleted
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Theme.of(context).cardColor,
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(context).cardColor,
                             border: Border.all(
-                                color: task.isCompleted
-                                    ? Theme.of(context).colorScheme.primary
-                                    : Theme.of(context).colorScheme.primary,
+                              color: task.isCompleted
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context).colorScheme.primary,
                               width: 2,
                             ),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: task.isCompleted
-                              ? const Icon(Icons.check,
-                                  size: 16, color: Colors.white)
+                              ? const Icon(
+                                  Icons.check,
+                                  size: 16,
+                                  color: Colors.white,
+                                )
                               : null,
                         ),
                       ),
@@ -295,9 +319,11 @@ class _HomeScreenState extends State<HomeScreen> {
                               style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w600,
-                                    color: task.isCompleted
-                                      ? Colors.grey[400]
-                                      : Theme.of(context).textTheme.bodyLarge?.color,
+                                color: task.isCompleted
+                                    ? Colors.grey[400]
+                                    : Theme.of(
+                                        context,
+                                      ).textTheme.bodyLarge?.color,
                                 decoration: task.isCompleted
                                     ? TextDecoration.lineThrough
                                     : null,
@@ -306,23 +332,35 @@ class _HomeScreenState extends State<HomeScreen> {
                             const SizedBox(height: 4),
                             Row(
                               children: [
-                                Icon(Icons.calendar_today,
-                                  size: 14, color: Theme.of(context).textTheme.bodySmall?.color),
+                                Icon(
+                                  Icons.calendar_today,
+                                  size: 14,
+                                  color: Theme.of(
+                                    context,
+                                  ).textTheme.bodySmall?.color,
+                                ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  DateFormat('MMM dd, yyyy').format(task.dueDate),
+                                  DateFormat(
+                                    'MMM dd, yyyy',
+                                  ).format(task.dueDate),
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: Theme.of(context).textTheme.bodySmall?.color,
+                                    color: Theme.of(
+                                      context,
+                                    ).textTheme.bodySmall?.color,
                                   ),
                                 ),
                                 const SizedBox(width: 16),
                                 Container(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 2),
+                                    horizontal: 8,
+                                    vertical: 2,
+                                  ),
                                   decoration: BoxDecoration(
-                                    color: _getPriorityColor(task.priority)
-                                        .withOpacity(0.2),
+                                    color: _getPriorityColor(
+                                      task.priority,
+                                    ).withOpacity(0.2),
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
@@ -354,7 +392,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
               ),
             ],
-            child: Icon(Icons.more_vert, color: Theme.of(context).iconTheme.color?.withOpacity(0.6), size: 20),
+            child: Icon(
+              Icons.more_vert,
+              color: Theme.of(context).iconTheme.color?.withOpacity(0.6),
+              size: 20,
+            ),
           ),
         ],
       ),

@@ -47,7 +47,11 @@ class ProfileScreen extends StatelessWidget {
                         colors: [Color(0xFF6A7BE0), Color(0xFF8B7FDB)],
                       ),
                       boxShadow: [
-                        BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 2)),
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 6,
+                          offset: Offset(0, 2),
+                        ),
                       ],
                     ),
                     child: Center(
@@ -74,10 +78,7 @@ class ProfileScreen extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     profileController.emailController.text,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: Colors.white70,
-                    ),
+                    style: const TextStyle(fontSize: 13, color: Colors.white70),
                   ),
                 ],
               ),
@@ -88,7 +89,9 @@ class ProfileScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Obx(() {
                 final total = taskController.tasks.length;
-                final completed = taskController.tasks.where((t) => t.isCompleted).length;
+                final completed = taskController.tasks
+                    .where((t) => t.isCompleted)
+                    .length;
                 final pending = total - completed;
                 return Row(
                   children: [
@@ -187,9 +190,24 @@ class ProfileScreen extends StatelessWidget {
                         title: 'Task Statistics',
                         content: Column(
                           children: [
-                            _buildStatRow('Total Tasks', taskController.tasks.length.toString()),
-                            _buildStatRow('Completed', taskController.tasks.where((t) => t.isCompleted).length.toString()),
-                            _buildStatRow('Pending', taskController.tasks.where((t) => !t.isCompleted).length.toString()),
+                            _buildStatRow(
+                              'Total Tasks',
+                              taskController.tasks.length.toString(),
+                            ),
+                            _buildStatRow(
+                              'Completed',
+                              taskController.tasks
+                                  .where((t) => t.isCompleted)
+                                  .length
+                                  .toString(),
+                            ),
+                            _buildStatRow(
+                              'Pending',
+                              taskController.tasks
+                                  .where((t) => !t.isCompleted)
+                                  .length
+                                  .toString(),
+                            ),
                           ],
                         ),
                       );
@@ -212,7 +230,9 @@ class ProfileScreen extends StatelessWidget {
                             SizedBox(height: 8),
                             Text('Developed by: Mohammad Ghrayeb & Ali Alayan'),
                             SizedBox(height: 8),
-                            Text('Course: CSC 415 - Mobile Application Development'),
+                            Text(
+                              'Course: CSC 415 - Mobile Application Development',
+                            ),
                           ],
                         ),
                         actions: [
@@ -241,15 +261,15 @@ class ProfileScreen extends StatelessWidget {
                     foregroundColor: Theme.of(context).colorScheme.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
-                      side: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.5),
+                      side: BorderSide(
+                        color: Theme.of(context).colorScheme.primary,
+                        width: 1.5,
+                      ),
                     ),
                   ),
                   child: const Text(
                     'Logout',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -333,7 +353,11 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ),
             ),
-            Icon(Icons.chevron_right, color: Theme.of(context).iconTheme.color?.withOpacity(0.5), size: 24),
+            Icon(
+              Icons.chevron_right,
+              color: Theme.of(context).iconTheme.color?.withOpacity(0.5),
+              size: 24,
+            ),
           ],
         ),
       ),

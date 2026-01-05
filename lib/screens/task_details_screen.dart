@@ -20,10 +20,7 @@ class TaskDetailsScreen extends StatelessWidget {
             icon: const Icon(Icons.edit),
             onPressed: () => _editTask(context),
           ),
-          IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: _deleteTask,
-          ),
+          IconButton(icon: const Icon(Icons.delete), onPressed: _deleteTask),
         ],
       ),
       body: ListView(
@@ -42,7 +39,7 @@ class TaskDetailsScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   if (task.description.isNotEmpty) ...[
                     Text(
                       task.description,
@@ -50,33 +47,29 @@ class TaskDetailsScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                   ],
-                  
+
                   _buildDetailRow(
                     Icons.calendar_today,
                     'Due Date',
                     '${task.dueDate.year}-${task.dueDate.month}-${task.dueDate.day}',
                   ),
-                  
+
                   _buildDetailRow(
                     Icons.priority_high,
                     'Priority',
                     task.priority.capitalizeFirst ?? task.priority,
                     color: _getPriorityColor(task.priority),
                   ),
-                  
-                  _buildDetailRow(
-                    Icons.category,
-                    'Category',
-                    task.category,
-                  ),
-                  
+
+                  _buildDetailRow(Icons.category, 'Category', task.category),
+
                   _buildDetailRow(
                     Icons.circle,
                     'Status',
                     task.isCompleted ? 'Completed' : 'Pending',
                     color: task.isCompleted ? Colors.green : Colors.orange,
                   ),
-                  
+
                   if (task.tags.isNotEmpty) ...[
                     const SizedBox(height: 16),
                     Text(
@@ -89,9 +82,7 @@ class TaskDetailsScreen extends StatelessWidget {
                     Wrap(
                       spacing: 8,
                       children: task.tags.map((tag) {
-                        return Chip(
-                          label: Text(tag),
-                        );
+                        return Chip(label: Text(tag));
                       }).toList(),
                     ),
                   ],
@@ -99,9 +90,9 @@ class TaskDetailsScreen extends StatelessWidget {
               ),
             ),
           ),
-          
+
           const SizedBox(height: 32),
-          
+
           if (!task.isCompleted) ...[
             ElevatedButton(
               onPressed: _completeTask,
@@ -120,7 +111,7 @@ class TaskDetailsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
           ],
-          
+
           ElevatedButton(
             onPressed: () => _editTask(context),
             style: ElevatedButton.styleFrom(
@@ -140,7 +131,12 @@ class TaskDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRow(IconData icon, String label, String value, {Color? color}) {
+  Widget _buildDetailRow(
+    IconData icon,
+    String label,
+    String value, {
+    Color? color,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -153,10 +149,7 @@ class TaskDetailsScreen extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                  ),
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -224,6 +217,6 @@ class TaskDetailsScreen extends StatelessWidget {
 
   void _editTask(BuildContext context) {
     // Navigate to the AddTaskScreen in edit mode
-    Get.to(() => AddTaskScreen(task: task));
+    Get.to(() => AddTaskScreen(existingTask: task));
   }
 }

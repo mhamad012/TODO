@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:taskflow/screens/home_screen.dart';
-import 'package:taskflow/screens/register_screen.dart';
+import 'package:taskflow/screens/login_screen.dart';
 import 'package:taskflow/controllers/profile_controller.dart';
-import 'package:taskflow/controllers/task_controller.dart';
-import 'package:taskflow/controllers/theme_controller.dart';
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+class RegisterScreen extends StatelessWidget {
+  const RegisterScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final ProfileController profileController = Get.find<ProfileController>();
+    
+    // Local controllers for registration (separate from profile controllers)
+    final TextEditingController nameController = TextEditingController();
+    final TextEditingController emailController = TextEditingController();
+    final TextEditingController passwordController = TextEditingController();
+    final TextEditingController confirmPasswordController = TextEditingController();
 
     return Scaffold(
       body: Container(
@@ -59,7 +62,7 @@ class LoginScreen extends StatelessWidget {
                           ],
                         ),
                         child: const Icon(
-                          Icons.check,
+                          Icons.person_add,
                           size: 60,
                           color: Colors.white,
                           weight: 800,
@@ -67,7 +70,7 @@ class LoginScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 24),
                       const Text(
-                        'TaskFlow',
+                        'Create Account',
                         style: TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
@@ -76,13 +79,62 @@ class LoginScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       const Text(
-                        'Organize your day, achieve your goals',
+                        'Sign up to get started',
                         style: TextStyle(
                           fontSize: 14,
                           color: Color(0xFF9E9E9E),
                         ),
                       ),
                       const SizedBox(height: 40),
+                      
+                      // Name Field
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Full Name',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: nameController,
+                        decoration: InputDecoration(
+                          hintText: 'Enter your name',
+                          hintStyle: TextStyle(color: Colors.grey[400]),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15),
+                            borderSide: BorderSide(color: Colors.grey[300]!),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15),
+                            borderSide: BorderSide(color: Colors.grey[300]!),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15),
+                            borderSide: const BorderSide(
+                              color: Color(0xFF1E88E5),
+                              width: 2,
+                            ),
+                          ),
+                          filled: true,
+                          fillColor: Colors.grey[50],
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
+                        ),
+                        style: const TextStyle(
+                          color: Colors.black87,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      
+                      // Email Field
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
@@ -96,7 +148,8 @@ class LoginScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 10),
                       TextField(
-                        controller: profileController.emailController,
+                        controller: emailController,
+                        keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
                           hintText: '@example.com',
                           hintStyle: TextStyle(color: Colors.grey[400]),
@@ -128,6 +181,8 @@ class LoginScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 20),
+                      
+                      // Password Field
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
@@ -141,7 +196,55 @@ class LoginScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 10),
                       TextField(
-                        controller: profileController.passwordController,
+                        controller: passwordController,
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          hintText: '••••••••',
+                          hintStyle: TextStyle(color: Colors.grey[400]),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15),
+                            borderSide: BorderSide(color: Colors.grey[300]!),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15),
+                            borderSide: BorderSide(color: Colors.grey[300]!),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15),
+                            borderSide: const BorderSide(
+                              color: Color(0xFF1E88E5),
+                              width: 2,
+                            ),
+                          ),
+                          filled: true,
+                          fillColor: Colors.grey[50],
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
+                        ),
+                        style: const TextStyle(
+                          color: Colors.black87,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      
+                      // Confirm Password Field
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Confirm Password',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: confirmPasswordController,
                         obscureText: true,
                         decoration: InputDecoration(
                           hintText: '••••••••',
@@ -174,6 +277,8 @@ class LoginScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 30),
+                      
+                      // Sign Up Button
                       SizedBox(
                         width: double.infinity,
                         child: Container(
@@ -193,14 +298,20 @@ class LoginScreen extends StatelessWidget {
                             ],
                           ),
                           child: ElevatedButton(
-                            onPressed: () => _handleLogin(profileController),
+                            onPressed: () => _handleRegister(
+                              profileController,
+                              nameController,
+                              emailController,
+                              passwordController,
+                              confirmPasswordController,
+                            ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.transparent,
                               shadowColor: Colors.transparent,
                               padding: const EdgeInsets.symmetric(vertical: 16),
                             ),
                             child: const Text(
-                              'Sign In',
+                              'Sign Up',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -211,23 +322,28 @@ class LoginScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 16),
+                      
+                      // Sign In Link
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            "Don't have an account? ",
+                            "Already have an account? ",
                             style: TextStyle(color: Colors.grey[700]),
                           ),
                           GestureDetector(
                             onTap: () {
-                              // Clear login fields before navigating to register
-                              profileController.clearControllers();
+                              // Clear all fields before going back
+                              nameController.clear();
+                              emailController.clear();
+                              passwordController.clear();
+                              confirmPasswordController.clear();
                               
-                              // Navigate to register screen
-                              Get.to(() => const RegisterScreen());
+                              // Navigate back to login
+                              Get.back();
                             },
                             child: const Text(
-                              'Sign Up',
+                              'Sign In',
                               style: TextStyle(
                                 color: Color(0xFF1E88E5),
                                 fontWeight: FontWeight.bold,
@@ -247,8 +363,32 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  void _handleLogin(ProfileController profileController) async {
-    if (profileController.emailController.text.isEmpty) {
+  bool _isValidEmail(String email) {
+    // Basic email validation
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    return emailRegex.hasMatch(email);
+  }
+
+  void _handleRegister(
+    ProfileController profileController,
+    TextEditingController nameController,
+    TextEditingController emailController,
+    TextEditingController passwordController,
+    TextEditingController confirmPasswordController,
+  ) async {
+    // Validate name
+    if (nameController.text.isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Please enter your name',
+        backgroundColor: Colors.red.shade100,
+        colorText: Colors.red.shade900,
+      );
+      return;
+    }
+
+    // Validate email
+    if (emailController.text.isEmpty) {
       Get.snackbar(
         'Error',
         'Please enter an email',
@@ -258,10 +398,55 @@ class LoginScreen extends StatelessWidget {
       return;
     }
 
-    if (profileController.passwordController.text.isEmpty) {
+    // Validate email format
+    if (!_isValidEmail(emailController.text)) {
+      Get.snackbar(
+        'Error',
+        'Please enter a valid email address',
+        backgroundColor: Colors.red.shade100,
+        colorText: Colors.red.shade900,
+      );
+      return;
+    }
+
+    // Validate password
+    if (passwordController.text.isEmpty) {
       Get.snackbar(
         'Error',
         'Please enter a password',
+        backgroundColor: Colors.red.shade100,
+        colorText: Colors.red.shade900,
+      );
+      return;
+    }
+
+    // Validate password length
+    if (passwordController.text.length < 6) {
+      Get.snackbar(
+        'Error',
+        'Password must be at least 6 characters',
+        backgroundColor: Colors.red.shade100,
+        colorText: Colors.red.shade900,
+      );
+      return;
+    }
+
+    // Validate confirm password
+    if (confirmPasswordController.text.isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Please confirm your password',
+        backgroundColor: Colors.red.shade100,
+        colorText: Colors.red.shade900,
+      );
+      return;
+    }
+
+    // Check if passwords match
+    if (passwordController.text != confirmPasswordController.text) {
+      Get.snackbar(
+        'Error',
+        'Passwords do not match',
         backgroundColor: Colors.red.shade100,
         colorText: Colors.red.shade900,
       );
@@ -274,44 +459,42 @@ class LoginScreen extends StatelessWidget {
       barrierDismissible: false,
     );
 
-    // Authenticate user
-    bool isAuthenticated = await profileController.authenticate(
-      profileController.emailController.text,
-      profileController.passwordController.text,
+    // Register user
+    bool isRegistered = await profileController.register(
+      nameController.text,
+      emailController.text,
+      passwordController.text,
     );
 
-    // Close loading dialog
+    // Close loading indicator
     Get.back();
 
-    if (isAuthenticated) {
-      // REMOVED: loadProfile() - already called inside authenticate()
+    if (isRegistered) {
+      // Clear all fields
+      nameController.clear();
+      emailController.clear();
+      passwordController.clear();
+      confirmPasswordController.clear();
       
-      // Load user's tasks
-      final TaskController taskController = Get.find<TaskController>();
-      await taskController.loadTasks();
-      
-      // Load user's theme preference
-      try {
-        final ThemeController themeController = Get.find<ThemeController>();
-        await themeController.loadThemePreference();
-      } catch (e) {
-        // ThemeController might not be initialized, that's okay
-      }
-      
-      // Navigate to home screen
-      Get.offAll(() => const HomeScreen());
-      
+      // Clear profile controller fields as well (for security)
+      profileController.clearControllers();
+
       // Show success message
       Get.snackbar(
         'Success',
-        'Welcome back, ${profileController.nameController.text}!',
+        'Account created successfully! Please login.',
         backgroundColor: Colors.green.shade100,
         colorText: Colors.green.shade900,
+        duration: const Duration(seconds: 3),
       );
+
+      // Navigate back to login screen
+      Get.off(() => const LoginScreen());
     } else {
+      // Show error message
       Get.snackbar(
         'Error',
-        'Invalid email or password',
+        'This email is already registered',
         backgroundColor: Colors.red.shade100,
         colorText: Colors.red.shade900,
       );
